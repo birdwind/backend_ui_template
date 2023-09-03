@@ -1,0 +1,97 @@
+<section class="management">
+  <div class="app-container calendar-list-container">
+    <div class="filter-container">
+      <bs-input v-model="paging.query.account" :placeholder="$t('user.account')"/>
+      <bs-select v-model="paging.query.state" :placeholder="$t('user.online')" :options="OnlineOptions"/>
+      <bs-search-button @click="handleSearch" v-permission="[Permission.USER_LIST]"/>
+<!--            <bs-search-button @click="handleSearch"/>-->
+    </div>
+
+    <el-table ref="table" :data="tableData" v-loading="paging.isLoading" :key="paging.isShow"
+              :element-loading-text="$t('system.ui.table.loading')"
+              border fit
+              highlight-current-row style="width: 100%" :cell-style="getCssStyle" @sort-change="onSortChange">
+      <!-- 流水號 -->
+      <el-table-column prop="uid" :label="$t('user.uid')" width="100px">
+        <template slot-scope="scope">{{ scope.row.uid }}</template>
+      </el-table-column>
+      <!-- 頭像 -->
+      <el-table-column prop="uid" :label="$t('user.avatar')" width="100px">
+        <template slot-scope="scope">
+          <div class="cell_center">
+            <el-image :src="scope.row.avatar"
+                      style="width: auto; height: 60px"
+                      fit="fit"
+                      v-if="scope.row.avatar"/>
+          </div>
+        </template>
+      </el-table-column>
+      <!-- 用戶名 -->
+      <el-table-column prop="username" :label="$t('user.account')" width="200px">
+        <template slot-scope="scope">{{ scope.row.username }}</template>
+      </el-table-column>
+      <!-- 昵稱 -->
+      <el-table-column prop="nickname" :label="$t('user.nickname')" width="200px">
+        <template slot-scope="scope">{{ scope.row.nickname }}</template>
+      </el-table-column>
+      <!-- 註冊時間 -->
+      <el-table-column prop="createTime" :label="$t('user.createTime')" width="200px">
+        <template slot-scope="scope">{{ scope.row.createTime }}</template>
+      </el-table-column>
+      <!--      &lt;!&ndash; 用戶資訊 &ndash;&gt;-->
+      <!--      <el-table-column :label="$t('user.info')" width="300px">-->
+      <!--        <template slot-scope="scope">-->
+      <!--          <div class="user-info">-->
+      <!--            <el-image :src="scope.row.avatar"-->
+      <!--                      style="width: auto; height: 60px"-->
+      <!--                      fit="fit"-->
+      <!--                      v-if="scope.row.avatar"/>-->
+      <!--            <div class="user-info__wrapper">-->
+      <!--              <div class="user-info__wrapper__column">-->
+      <!--                <span>用戶名: </span>-->
+      <!--                <span>{{ scope.row.username }}</span>-->
+      <!--              </div>-->
+      <!--              <div class="user-info__wrapper__column">-->
+      <!--                <span>昵稱: </span>-->
+      <!--                <span>{{ scope.row.nickname }}</span>-->
+      <!--              </div>-->
+      <!--              <div class="user-info__wrapper__column">-->
+      <!--                <span>註冊時間: </span>-->
+      <!--                <span>{{ scope.row.createTime }}</span>-->
+      <!--              </div>-->
+      <!--            </div>-->
+      <!--          </div>-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
+      <!-- 最後登入時間 -->
+      <el-table-column prop="lastLoginTime" :label="$t('user.lastLogin')" width="200px">
+        <template slot-scope="scope">{{ scope.row.lastLoginTime }}</template>
+      </el-table-column>
+      <!-- 最後登入渠道 -->
+      <el-table-column prop="lastLoginChannel" :label="$t('user.lastLoginChannel')" min-width="100px">
+        <template slot-scope="scope">
+          {{ scope.row.lastLoginChannel === 99 ? LoginChannel[0].name : LoginChannel[scope.row.lastLoginChannel].name }}
+        </template>
+      </el-table-column>
+      <!-- 最後活躍時間 -->
+      <el-table-column prop="lastActiveTime" :label="$t('user.lastActive')" min-width="200px">
+        <template slot-scope="scope">{{ scope.row.lastActiveTime }}</template>
+      </el-table-column>
+      <!-- 操作 -->
+      <el-table-column prop="lastActiveTime" :label="$t('common.action')" min-width="200px">
+        <template slot-scope="scope">
+          <div>
+            <bs-button v-if="scope.row.delFlag === false" :title="$t('user.ban')"
+                       @click="handleBlock(scope.row, true)"/>
+            <bs-button v-else :title="$t('user.unban')" @click="handleBlock(scope.row, false)"/>
+            <bs-button v-if="scope.row.online === true" :title="$t('user.kick')" @click="handleKickOut(scope.row)"/>
+          </div>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <bs-pagination :current-page="page" :page-size="paging.query.pageSize" :total="paging.totalElements"
+                   @on-change-page="handleCurrentChange" @on-change-page-size="handleSizeChange"/>
+  </div>
+</section>
+

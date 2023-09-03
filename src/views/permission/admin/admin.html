@@ -1,0 +1,125 @@
+<section class="admin">
+  <div class="app-container calendar-list-container">
+    <div class="filter-container">
+      <bs-input v-model="paging.query.title" :placeholder="$t('banner.table.title')"/>
+      <bs-search-button @click="handleSearch" v-permission="[Permission.PERMISSION_USER_LIST]"/>
+      <bs-add-button @click="handleCreate" v-permission="[Permission.PERMISSION_USER_ADD]"/>
+    </div>
+
+    <el-table ref="table" :data="tableData" v-loading="paging.isLoading" :key="paging.isShow"
+              :element-loading-text="$t('system.ui.table.loading')"
+              border fit
+              highlight-current-row style="width: 100%" :cell-style="getCssStyle" @sort-change="onSortChange">
+      <!-- 流水號 -->
+      <el-table-column prop="id" :label="$t('system.ui.table.id')" width="180px">
+        <template slot-scope="scope">
+          <a @click="handleEdit(scope.row)">{{ scope.row.id }}</a>
+        </template>
+      </el-table-column>
+      <!-- 呢稱 -->
+      <el-table-column prop="nickname" :label="$t('admin.nickname')" width="180px">
+        <template slot-scope="scope">{{ scope.row.nickname }}</template>
+      </el-table-column>
+      <!-- 帳號 -->
+      <el-table-column prop="username" :label="$t('admin.username')" width="180px">
+        <template slot-scope="scope">{{ scope.row.username }}</template>
+      </el-table-column>
+      <!-- 用戶層級 1: 管理員, 2: 商戶 -->
+      <el-table-column prop="level" :label="$t('admin.level')" width="180px">
+        <template slot-scope="scope">
+          <bs-status :status="Number(scope.row.level)" :options="LevelOptions" :clickable="false"/>
+        </template>
+      </el-table-column>
+      <!-- 状态 0:禁用,1:启用 -->
+      <el-table-column prop="status" :label="$t('admin.status')" width="180px">
+        <template slot-scope="scope">
+          <bs-status :status="Number(scope.row.status)" :clickable="false"/>
+        </template>
+      </el-table-column>
+      <!-- 創建時間 -->
+      <el-table-column prop="createTime" :label="$t('admin.createTime')" width="180px">
+        <template slot-scope="scope">{{ scope.row.createTime }}</template>
+      </el-table-column>
+      <!-- 最後更新時間 -->
+      <el-table-column prop="updateTime" :label="$t('admin.updateTime')" width="180px">
+        <template slot-scope="scope">{{ scope.row.updateTime }}</template>
+      </el-table-column>
+      <!-- 操作 -->
+      <el-table-column :label="$t('common.action')" min-width="200px">
+        <template slot-scope="scope">
+          <div class="cell_left">
+            <bs-button :title="$t('admin.resetPassword')" @click="handleResetPassword(scope.row)"
+                       v-permission="[Permission.PERMISSION_USER_PWD_RESET]"/>
+            <bs-button :title="$t('admin.kick')" @click="kick(scope.row)" v-permission="[Permission.PERMISSION_USER_ONLINE_KICK]"/>
+          </div>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <bs-pagination :current-page="page" :page-size="paging.query.pageSize" :total="paging.totalElements"
+                   @on-change-page="handleCurrentChange" @on-change-page-size="handleSizeChange"/>
+  </div>
+
+  <el-dialog :title="DialogTypeOptions[editDialog.dialogType].name" :visible.sync="editDialog.isVisible"
+             v-if="editDialog.isVisible"
+             :close-on-click-modal="false" :show-close="true">
+    <el-form :rules="editDialog.rules" ref="dataForm" :model="editDialog.data" label-position="left">
+      <el-form-item :label="$t('admin.username')" prop="username">
+        <bs-input v-model="editDialog.data.username" :disabled="editDialog.dialogType !== DialogType.Create"/>
+      </el-form-item>
+      <el-form-item v-if="editDialog.dialogType === DialogType.Create" :label="$t('admin.password')" prop="password">
+        <bs-input type="password" v-model="editDialog.data.password"/>
+      </el-form-item>
+      <el-form-item :label="$t('admin.nickname')" prop="nickname">
+        <bs-input v-model="editDialog.data.nickname"/>
+      </el-form-item>
+      <el-form-item :label="$t('admin.roleId')" prop="roleId">
+        <bs-select v-model="editDialog.data.roleId" :placeholder="$t('admin.roleId')"
+                   :options="editDialog.RoleOptions"/>
+      </el-form-item>
+      <el-form-item :label="$t('admin.level')" prop="level">
+        <bs-select v-model="editDialog.data.level" :placeholder="$t('admin.level')" :options="LevelOptions"/>
+      </el-form-item>
+      <el-form-item :label="$t('admin.status')" prop="level">
+        <bs-select v-model="editDialog.data.status" :placeholder="$t('admin.status')" :options="StatusOptions"/>
+      </el-form-item>
+      <el-form-item :label="$t('admin.email')" prop="email">
+        <bs-input v-model="editDialog.data.email"/>
+      </el-form-item>
+      <el-form-item :label="$t('admin.phone')" prop="phone">
+        <bs-input v-model="editDialog.data.phone"/>
+      </el-form-item>
+    </el-form>
+
+    <div slot="footer" class="dialog-footer">
+      <bs-cancel-button @click="editDialog.isVisible = false"/>
+      <bs-submit-button v-if="editDialog.dialogType === DialogType.Create" @click="createData"/>
+      <bs-submit-button v-else @click="updateData"/>
+    </div>
+  </el-dialog>
+
+
+  <el-dialog :title="$t('admin.resetPassword')" :visible.sync="resetPasswordDialog.isVisible"
+             v-if="resetPasswordDialog.isVisible" :close-on-click-modal="false" :show-close="true">
+    <el-form :rules="resetPasswordDialog.rules" ref="resetPasswordForm" :model="resetPasswordDialog.data"
+             label-position="left" label-width="100px">
+      <el-form-item :label="$t('admin.username')" prop="username">
+        <bs-input v-model="resetPasswordDialog.data.username" disabled/>
+      </el-form-item>
+      <el-form-item :label="$t('admin.newPassword')" prop="password">
+        <bs-input type="password" v-model="resetPasswordDialog.data.password"
+                  :placeholder="$t('admin.newPassword')"/>
+      </el-form-item>
+      <el-form-item :label="$t('admin.confirmPassword')" prop="confirmPassword">
+        <bs-input type="password" v-model="resetPasswordDialog.data.confirmPassword"
+                  :placeholder="$t('admin.confirmPassword')"/>
+      </el-form-item>
+    </el-form>
+
+    <div slot="footer" class="dialog-footer">
+      <bs-cancel-button @click="resetPasswordDialog.isVisible = false"/>
+      <bs-submit-button @click="resetPassword"/>
+    </div>
+  </el-dialog>
+</section>
+

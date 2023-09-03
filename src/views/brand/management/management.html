@@ -1,0 +1,227 @@
+<section class="management">
+  <div class="dashboard-editor-container" v-loading="isLoading">
+    <el-row :gutter="32">
+      <!-- 系統 -->
+      <el-col :xs="24" :sm="24" :lg="24">
+        <el-card class="box-card">
+          <div slot="header" style="display: flex;">
+            <bs-button title="儲存" style="margin-left: auto;"/>
+          </div>
+          <div style="display: flex; flex: 0 1 auto;">
+            <el-form
+              :rules="rules"
+              ref="dataForm"
+              :model="formData.banner"
+              label-position="left"
+              label-width="100px"
+            >
+              <el-form-item prop="protocol" :label="$t('brand.protocol')">
+                <bs-input v-model="formData.protocol" :placeholder="$t('brand.protocol')"/>
+              </el-form-item>
+              <el-form-item prop="domain" :label="$t('brand.domain')">
+                <bs-input v-model="formData.domain" :placeholder="$t('brand.domain')"/>
+              </el-form-item>
+            </el-form>
+          </div>
+        </el-card>
+      </el-col>
+      <!-- 廣告 -->
+      <el-col :xs="24" :sm="24" :lg="8">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>{{$t('brand.banner.title')}}</span>
+<!--            <el-button style="float: right; padding: 3px 0" type="text">儲存</el-button>-->
+          </div>
+          <el-form
+            :rules="rules"
+            ref="dataForm"
+            :model="formData.banner"
+            label-position="left"
+            label-width="100px"
+          >
+            <el-form-item prop="intervalSecond" :label="$t('brand.banner.intervalSecond')">
+              <bs-input v-model="formData.banner.intervalSecond" :placeholder="$t('brand.banner.intervalSecond')"/>
+            </el-form-item>
+            <el-form-item prop="autoEnable" :label="$t('brand.banner.autoEnable')">
+              <bs-switch v-model="formData.banner.autoEnable"/>
+            </el-form-item>
+            <el-form-item prop="enable" :label="$t('brand.banner.enable')">
+              <bs-switch v-model="formData.banner.enable"/>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </el-col>
+      <!-- 官方號 -->
+      <el-col :xs="24" :sm="24" :lg="8">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>{{$t('brand.official.title')}}</span>
+<!--            <el-button style="float: right; padding: 3px 0" type="text">儲存</el-button>-->
+          </div>
+          <el-form
+            :rules="rules"
+            ref="dataForm"
+            :model="formData.official"
+            label-position="left"
+            label-width="100px"
+          >
+            <el-form-item prop="imgUrl" :label="$t('brand.official.avatar')">
+              <div class="input-container">
+                <!--                <i v-if="showDeleteIcon" class="el-icon-delete cancel" @click="handleCancel"></i>-->
+                <input ref="officialImgUrl" class="input-file" type="file" name="photo" @change="handlePreviewImage($event, 'official')" />
+                <img v-if="formData.official.avatar || formData.official.avatarFile"
+                     :src="officialAvatar" />
+                <i v-if="!formData.official.avatar && !formData.official.avatarFile" class="el-icon-plus avatar-uploader-icon"></i>
+              </div>
+            </el-form-item>
+            <el-form-item prop="nickname" :label="$t('brand.official.nickname')">
+              <bs-input v-model="formData.official.nickname" :placeholder="$t('brand.official.nickname')"/>
+            </el-form-item>
+            <el-form-item prop="welcome" :label="$t('brand.official.welcome')">
+              <bs-input v-model="formData.official.welcome" :placeholder="$t('brand.official.welcome')"/>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </el-col>
+      <!-- 紅包 -->
+      <el-col :xs="24" :sm="24" :lg="8">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>{{$t('brand.redEnvelope.title')}}</span>
+<!--            <el-button style="float: right; padding: 3px 0" type="text">儲存</el-button>-->
+          </div>
+          <el-form
+            :rules="rules"
+            ref="dataForm"
+            :model="formData.redEnvelope"
+            label-position="left"
+            label-width="100px"
+          >
+            <el-form-item prop="sendMinQuantity" :label="$t('brand.redEnvelope.sendMinQuantity')">
+              <bs-input v-model="formData.redEnvelope.sendMinQuantity" :placeholder="$t('brand.redEnvelope.sendMinQuantity')"/>
+            </el-form-item>
+            <el-form-item prop="sendMaxQuantity" :label="$t('brand.redEnvelope.sendMaxQuantity')">
+              <bs-input v-model="formData.redEnvelope.sendMaxQuantity" :placeholder="$t('brand.redEnvelope.sendMaxQuantity')"/>
+            </el-form-item>
+            <el-form-item prop="sendEnable" :label="$t('brand.redEnvelope.sendEnable')">
+              <bs-switch v-model="formData.redEnvelope.sendEnable"/>
+            </el-form-item>
+            <el-form-item prop="receiveEnable" :label="$t('brand.redEnvelope.receiveEnable')">
+              <bs-switch v-model="formData.redEnvelope.receiveEnable"/>
+            </el-form-item>
+            <el-form-item prop="enable" :label="$t('brand.redEnvelope.enable')">
+              <bs-switch v-model="formData.redEnvelope.enable"/>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </el-col>
+      <!-- PC -->
+      <el-col :xs="24" :sm="24" :lg="8">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>{{ $t('brand.promotion.pc')}}</span>
+<!--            <el-button style="float: right; padding: 3px 0" type="text">儲存</el-button>-->
+          </div>
+          <el-form
+            :rules="rules"
+            ref="dataForm"
+            :model="formData.pc"
+            label-position="left"
+            label-width="100px"
+          >
+            <el-form-item prop="imgUrl" :label="$t('brand.promotion.imgUrl')">
+              <div class="input-container">
+                <!--                <i v-if="showDeleteIcon" class="el-icon-delete cancel" @click="handleCancel"></i>-->
+                <input ref="iosImgUrl" class="input-file" type="file" name="photo" @change="handlePreviewImage($event, 'pc')" />
+                <img v-if="formData.pc.imgUrl || formData.pc.imgUrlFile"
+                     :src="pcImgUrl" />
+                <i v-if="!formData.pc.imgUrl && !formData.pc.imgUrlFile" class="el-icon-plus avatar-uploader-icon"></i>
+              </div>
+            </el-form-item>
+            <el-form-item prop="imgPlaySecond" :label="$t('brand.promotion.imgPlaySecond')">
+              <bs-input v-model="formData.pc.imgPlaySecond" :placeholder="$t('brand.promotion.imgPlaySecond')"/>
+            </el-form-item>
+            <el-form-item prop="imgSkipSecond" :label="$t('brand.promotion.imgSkipSecond')">
+              <bs-input v-model="formData.pc.imgSkipSecond" :placeholder="$t('brand.promotion.imgSkipSecond')"/>
+            </el-form-item>
+            <el-form-item prop="contactsEnable" :label="$t('brand.promotion.contactsEnable')">
+              <bs-switch v-model="formData.pc.contactsEnable"/>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </el-col>
+      <!-- Android -->
+      <el-col :xs="24" :sm="24" :lg="8">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>{{ $t('brand.promotion.android')}}</span>
+<!--            <el-button style="float: right; padding: 3px 0" type="text">儲存</el-button>-->
+          </div>
+          <el-form
+            :rules="rules"
+            ref="dataForm"
+            :model="formData.android"
+            label-position="left"
+            label-width="100px"
+          >
+            <el-form-item prop="imgUrl" :label="$t('brand.promotion.imgUrl')">
+              <div class="input-container">
+<!--                <i v-if="showDeleteIcon" class="el-icon-delete cancel" @click="handleCancel"></i>-->
+                <input ref="avatar" class="input-file" type="file" name="photo" @change="handlePreviewImage($event, 'android')" />
+                <img v-if="formData.android.imgUrl || formData.android.imgUrlFile"
+                     :src="androidImgUrl" />
+                <i v-if="!formData.android.imgUrl && !formData.android.imgUrlFile" class="el-icon-plus avatar-uploader-icon"></i>
+              </div>
+            </el-form-item>
+            <el-form-item prop="imgPlaySecond" :label="$t('brand.promotion.imgPlaySecond')">
+              <bs-input v-model="formData.android.imgPlaySecond" :placeholder="$t('brand.promotion.imgPlaySecond')"/>
+            </el-form-item>
+            <el-form-item prop="imgSkipSecond" :label="$t('brand.promotion.imgSkipSecond')">
+              <bs-input v-model="formData.android.imgSkipSecond" :placeholder="$t('brand.promotion.imgSkipSecond')"/>
+            </el-form-item>
+            <el-form-item prop="contactsEnable" :label="$t('brand.promotion.contactsEnable')">
+              <bs-switch v-model="formData.android.contactsEnable"/>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </el-col>
+      <!-- IOS -->
+      <el-col :xs="24" :sm="24" :lg="8">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>{{ $t('brand.promotion.ios')}}</span>
+<!--            <el-button style="float: right; padding: 3px 0" type="text">儲存</el-button>-->
+          </div>
+          <el-form
+            :rules="rules"
+            ref="dataForm"
+            :model="formData.ios"
+            label-position="left"
+            label-width="100px"
+          >
+            <el-form-item prop="imgUrl" :label="$t('brand.promotion.imgUrl')">
+              <div class="input-container">
+<!--                <i v-if="showDeleteIcon" class="el-icon-delete cancel" @click="handleCancel"></i>-->
+                <input ref="iosImgUrl" class="input-file" type="file" name="photo" @change="handlePreviewImage($event, 'ios')" />
+                <img v-if="formData.ios.imgUrl || formData.ios.imgUrlFile"
+                     :src="iosImgUrl" />
+                <i v-if="!formData.ios.imgUrl && !formData.ios.imgUrlFile" class="el-icon-plus avatar-uploader-icon"></i>
+              </div>
+            </el-form-item>
+            <el-form-item prop="imgPlaySecond" :label="$t('brand.promotion.imgPlaySecond')">
+              <bs-input v-model="formData.ios.imgPlaySecond" :placeholder="$t('brand.imgPlaySecond')"/>
+            </el-form-item>
+            <el-form-item prop="imgSkipSecond" :label="$t('brand.promotion.imgSkipSecond')">
+              <bs-input v-model="formData.ios.imgSkipSecond" :placeholder="$t('brand.imgSkipSecond')"/>
+            </el-form-item>
+            <el-form-item prop="contactsEnable" :label="$t('brand.promotion.contactsEnable')">
+              <bs-switch v-model="formData.ios.contactsEnable"/>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </el-col>
+    </el-row>
+
+  </div>
+</section>
+

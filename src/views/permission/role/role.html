@@ -1,0 +1,85 @@
+<section class="role" v-loading="isLoading">
+  <div class="app-container calendar-list-container">
+    <div class="filter-container">
+      <bs-input v-model="paging.query.name" :placeholder="$t('role.name')"/>
+      <bs-search-button @click="handleSearch" v-permission="[Permission.PERMISSION_ROLE_LIST]" />
+      <bs-add-button @click="handleCreate" v-permission="[Permission.PERMISSION_ROLE_ADD]"/>
+    </div>
+
+    <el-table ref="table" :data="tableData" v-loading="paging.isLoading" :key="paging.isShow"
+              :element-loading-text="$t('system.ui.table.loading')"
+              border fit
+              highlight-current-row style="width: 100%" :cell-style="getCssStyle" @sort-change="onSortChange">
+      <!-- 流水號 -->
+      <el-table-column prop="id" :label="$t('system.ui.table.id')" width="180px">
+        <template slot-scope="scope">
+          <a @click="handleUpdate(scope.row)">{{ scope.row.id }}</a>
+        </template>
+      </el-table-column>
+      <!-- 名称 -->
+      <el-table-column prop="name" :label="$t('role.name')" width="180px">
+        <template slot-scope="scope">{{ scope.row.name }}</template>
+      </el-table-column>
+      <!-- 备注 -->
+      <el-table-column prop="remark" :label="$t('role.remark')" min-width="180px">
+        <template slot-scope="scope">{{ scope.row.remark }}</template>
+      </el-table-column>
+      <!-- 状态 0:禁用,1:启用 -->
+      <el-table-column prop="status" :label="$t('role.status')" width="180px">
+        <template slot-scope="scope">
+          <bs-status :status="Number(scope.row.status)" :clickable="false" />
+        </template>
+<!--        <template slot-scope="scope">{{ scope.row.status }}</template>-->
+      </el-table-column>
+      <!-- 操作 -->
+      <el-table-column prop="status" :label="$t('common.action')" min-width="180px">
+        <template slot-scope="scope">
+          <bs-button :title="$t('common.delete')" @click="deleteRole(scope.row)" v-permission="[Permission.PERMISSION_ROLE_DELETE]"/>
+        </template>
+<!--        <template slot-scope="scope">{{ scope.row.status }}</template>-->
+      </el-table-column>
+<!--      &lt;!&ndash; 等级 &ndash;&gt;-->
+<!--      <el-table-column prop="level" :label="$t('role.level')" width="180px">-->
+<!--        <template slot-scope="scope">{{ scope.row.level }}</template>-->
+<!--      </el-table-column>-->
+<!--      &lt;!&ndash; 代理阶层路径，含自己，并且斜线结尾 &ndash;&gt;-->
+<!--      <el-table-column prop="fullPath" :label="$t('role.fullPath')" width="180px">-->
+<!--        <template slot-scope="scope">{{ scope.row.fullPath }}</template>-->
+<!--      </el-table-column>-->
+    </el-table>
+
+    <bs-pagination :current-page="page" :page-size="paging.query.pageSize" :total="paging.totalElements"
+                   @on-change-page="handleCurrentChange" @on-change-page-size="handleSizeChange"/>
+  </div>
+
+  <el-dialog :title="DialogTypeOptions[editDialog.dialogType].name" :visible.sync="editDialog.isVisible" v-if="editDialog.isVisible"
+             :close-on-click-modal="false" :show-close="true">
+    <el-form :rules="editDialog.rules" ref="dataForm" :model="editDialog.data" label-position="left">
+      <el-form-item :label="$t('role.name')" prop="name">
+        <bs-input v-model="editDialog.data.name" />
+      </el-form-item>
+      <el-form-item :label="$t('role.parent')" prop="parentId">
+        <bs-select v-model="editDialog.data.parentId" :options="editDialog.parentOptions" :clearable="false" :placeholder="$t('role.parent')"/>
+      </el-form-item>
+      <el-form-item :label="$t('role.status')" prop="parentId">
+        <bs-select v-model="editDialog.data.status" :options="StatusOptions" :clearable="false" :placeholder="$t('role.status')"/>
+      </el-form-item>
+      <el-form-item :label="$t('role.acl')" style="{margin-right: -10px}" :required="true">
+        <div style='margin-left:10px;'>
+          <v-tree ref="aclTree" :data="editDialog.userAcls" :multiple="true" :tpl="tpl" :halfcheck="true"
+                  :expandAll="true" />
+        </div>
+      </el-form-item>
+      <el-form-item :label="$t('common.memo')" prop="memo">
+        <bs-text-area v-model="editDialog.data.remark" />
+      </el-form-item>
+    </el-form>
+
+    <div slot="footer" class="dialog-footer">
+      <bs-cancel-button @click="editDialog.isVisible = false" />
+      <bs-submit-button v-if="editDialog.dialogType === DialogType.Create" @click="createData" />
+      <bs-submit-button v-else @click="updateData" />
+    </div>
+  </el-dialog>
+</section>
+

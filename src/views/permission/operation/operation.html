@@ -1,0 +1,52 @@
+<section class="operation">
+  <div class="app-container calendar-list-container">
+    <div class="filter-container">
+      <bs-input v-model="paging.query.memberId" :placeholder="$t('operation.userId')"/>
+      <bs-input v-model="paging.query.code" :placeholder="$t('operation.code')"/>
+      <bs-date-range-picker v-model="paging.queryCurrent.dates" :clearable="true"/>
+      <bs-search-button @click="handleSearch" v-permission="[Permission.PERMISSION_OPERATIONLOG_LIST]" />
+    </div>
+
+    <el-table ref="table" :data="tableData" v-loading="paging.isLoading" :key="paging.isShow"
+              :element-loading-text="$t('system.ui.table.loading')"
+              border fit
+              highlight-current-row style="width: 100%" :cell-style="getCssStyle" @sort-change="onSortChange">
+      <!-- 流水號 -->
+      <el-table-column prop="id" :label="$t('system.ui.table.id')" width="180px">
+        <template slot-scope="scope">{{ scope.row.id }}</template>
+      </el-table-column>
+      <!-- 用戶ID -->
+      <el-table-column prop="userId" :label="$t('operation.userId')" width="180px">
+        <template slot-scope="scope">{{ scope.row.userId }}</template>
+      </el-table-column>
+      <!-- 用戶帐号 -->
+      <el-table-column prop="account" :label="$t('operation.account')" width="180px">
+        <template slot-scope="scope">{{ scope.row.account }}</template>
+      </el-table-column>
+      <!-- 编码 -->
+      <el-table-column prop="code" :label="$t('operation.code')" width="180px">
+        <template slot-scope="scope">{{ scope.row.code }}</template>
+      </el-table-column>
+      <!-- 请求 -->
+      <el-table-column prop="request" :label="$t('operation.request')" width="180px">
+        <template slot-scope="scope">{{ scope.row.request }}</template>
+      </el-table-column>
+      <!-- 变更 -->
+      <el-table-column prop="change" :label="$t('operation.change')" width="180px">
+        <template slot-scope="scope">{{ scope.row.change }}</template>
+      </el-table-column>
+      <!-- 备注 -->
+      <el-table-column prop="remark" :label="$t('operation.remark')" width="180px">
+        <template slot-scope="scope">{{ scope.row.remark }}</template>
+      </el-table-column>
+      <!-- 創建時間 -->
+      <el-table-column prop="createTime" :label="$t('common.createDate')" width="180px">
+        <template slot-scope="scope">{{ scope.row.createTime }}</template>
+      </el-table-column>
+    </el-table>
+
+    <bs-pagination :current-page="page" :page-size="paging.query.pageSize" :total="paging.totalElements"
+                   @on-change-page="handleCurrentChange" @on-change-page-size="handleSizeChange"/>
+  </div>
+</section>
+

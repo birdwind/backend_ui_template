@@ -1,0 +1,68 @@
+<section class="white-list">
+  <section class="admin">
+    <div class="app-container calendar-list-container">
+      <div class="filter-container">
+        <bs-input v-model="paging.query.ip" :placeholder="$t('whiteList.ip')"/>
+        <bs-search-button @click="handleSearch" v-permission="[Permission.PERMISSION_WHITE_LIST]"/>
+        <bs-add-button @click="handleCreate" v-permission="[Permission.PERMISSION_WHITE_ADD]"/>
+      </div>
+
+      <el-table ref="table" :data="tableData" v-loading="paging.isLoading" :key="paging.isShow"
+                :element-loading-text="$t('system.ui.table.loading')"
+                border fit
+                highlight-current-row style="width: 100%" :cell-style="getCssStyle" @sort-change="onSortChange">
+        <!-- 流水號 -->
+        <el-table-column prop="id" :label="$t('system.ui.table.id')" width="180px">
+          <template slot-scope="scope">
+            <a @click="handleUpdate(scope.row)">{{ scope.row.id }}</a>
+          </template>
+        </el-table-column>
+        <!-- IP -->
+        <el-table-column prop="id" :label="$t('whiteList.ip')" width="180px">
+          <template slot-scope="scope">{{ scope.row.ip }}</template>
+        </el-table-column>
+        <!-- 備註 -->
+        <el-table-column prop="id" :label="$t('common.memo')" min-width="180px">
+          <template slot-scope="scope">{{ scope.row.remark }}</template>
+        </el-table-column>
+        <!-- 建立時間 -->
+        <el-table-column prop="id" :label="$t('common.createDate')" width="180px">
+          <template slot-scope="scope">{{ scope.row.createDate }}</template>
+        </el-table-column>
+        <!-- 更新時間 -->
+        <el-table-column prop="id" :label="$t('common.updateDate')" width="180px">
+          <template slot-scope="scope">{{ scope.row.updateDate }}</template>
+        </el-table-column>
+        <!-- 操作 -->
+        <el-table-column prop="status" :label="$t('common.action')" min-width="180px">
+          <template slot-scope="scope">
+            <bs-button :title="$t('common.delete')" @click="deleteData(scope.row)" v-permission="[Permission.PERMISSION_WHITE_DELETE]"/>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <bs-pagination :current-page="page" :page-size="paging.query.pageSize" :total="paging.totalElements"
+                     @on-change-page="handleCurrentChange" @on-change-page-size="handleSizeChange"/>
+    </div>
+  </section>
+
+  <el-dialog :title="DialogTypeOptions[editDialog.dialogType].name" :visible.sync="editDialog.isVisible"
+             v-if="editDialog.isVisible"
+             :close-on-click-modal="false" :show-close="true">
+    <el-form :rules="editDialog.rules" ref="dataForm" :model="editDialog.data" label-position="left">
+      <el-form-item :label="$t('whiteList.ip')" prop="ip">
+        <bs-input v-model="editDialog.data.ip"/>
+      </el-form-item>
+      <el-form-item :label="$t('common.memo')" prop="memo">
+        <bs-text-area v-model="editDialog.data.remark"/>
+      </el-form-item>
+    </el-form>
+
+    <div slot="footer" class="dialog-footer">
+      <bs-cancel-button @click="editDialog.isVisible = false"/>
+      <bs-submit-button v-if="editDialog.dialogType === DialogType.Create" @click="createData"/>
+      <bs-submit-button v-else @click="updateData"/>
+    </div>
+  </el-dialog>
+</section>
+

@@ -1,0 +1,15 @@
+.management {
+  .user-info {
+    display: flex;
+    flex: 0 1 auto;
+
+    .user-info__wrapper {
+      width: 100%;
+      margin-left: 9px;
+
+      &__column {
+
+      }
+    }
+  }
+}
